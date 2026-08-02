@@ -138,6 +138,11 @@ function assertPathComponentsNotSymbolicLinks(
   protectedPath: string,
   ownershipRoots: readonly string[],
 ): void {
+  // Fork build: allow explicit opt-out for setups that intentionally place
+  // state (e.g. `~/.openclaw/agents`) on another volume via a symlink.
+  if (process.env.OPENCLAW_ALLOW_SYMLINK_PATHS === "1") {
+    return;
+  }
   const rootPath = ownershipRoots.find((candidate) => isPathInside(candidate, protectedPath));
   if (!rootPath) {
     return;

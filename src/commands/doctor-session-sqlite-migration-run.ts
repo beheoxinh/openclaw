@@ -420,6 +420,11 @@ export function isRegularFileWithoutFollowingSymlinks(filePath: string): boolean
 }
 
 export function hasSymbolicLinkInDirectoryPath(directoryPath: string): boolean {
+  // Fork build: explicit opt-out for state dirs intentionally placed on
+  // another volume via symlink (see OPENCLAW_ALLOW_SYMLINK_PATHS).
+  if (process.env.OPENCLAW_ALLOW_SYMLINK_PATHS === "1") {
+    return false;
+  }
   const resolvedPath = path.resolve(directoryPath);
   const root = path.parse(resolvedPath).root;
   let currentPath = root;
@@ -559,6 +564,11 @@ function normalizeMigrationMove(move: SessionSqliteMigrationMove): SessionSqlite
 }
 
 function hasUnsupportedV1DirectorySymlink(manifest: SessionSqliteMigrationManifest): boolean {
+  // Fork build: explicit opt-out for state dirs intentionally placed on
+  // another volume via symlink (see OPENCLAW_ALLOW_SYMLINK_PATHS).
+  if (process.env.OPENCLAW_ALLOW_SYMLINK_PATHS === "1") {
+    return false;
+  }
   const directoryPaths = manifest.targets.flatMap((target) => [
     path.dirname(target.sqlitePath),
     path.dirname(target.storePath),
@@ -628,6 +638,11 @@ function assertSafeMigrationTargetTopology(target: SessionSqliteMigrationTargetI
 }
 
 function isSymbolicLinkPath(filePath: string): boolean {
+  // Fork build: explicit opt-out for state dirs intentionally placed on
+  // another volume via symlink (see OPENCLAW_ALLOW_SYMLINK_PATHS).
+  if (process.env.OPENCLAW_ALLOW_SYMLINK_PATHS === "1") {
+    return false;
+  }
   try {
     return fs.lstatSync(filePath).isSymbolicLink();
   } catch (error) {
