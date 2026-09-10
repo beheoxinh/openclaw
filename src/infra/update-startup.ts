@@ -966,6 +966,17 @@ async function runGatewayUpdateCheckOwned(
   if (params.isNixMode) {
     return;
   }
+  // Fork build: never poll the public npm registry from the gateway. This repo
+  // is updated by pulling + rebuilding the fork, so registry update checks and
+  // auto-update handoffs are disabled unless the operator opts back in with
+  // OPENCLAW_ALLOW_UPDATE_CHECK=1.
+  if (process.env.OPENCLAW_ALLOW_UPDATE_CHECK !== "1") {
+    setUpdateAvailableCache({
+      next: null,
+      onUpdateAvailableChange: params.onUpdateAvailableChange,
+    });
+    return;
+  }
   const updateCampaign = params.updateCampaign ?? gatewayUpdateCampaign;
   // The admitted target belongs to the applying owner until it settles.
   if (updateCampaign.getState()?.state === "applying") {
